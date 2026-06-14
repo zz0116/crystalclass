@@ -255,7 +255,7 @@
     <h1>Finally, a crystal structure tool <span>built for teaching</span></h1>
     <p>Interactive 3D unit cell visualizations designed for chemistry classrooms. No downloads. No steep learning curves. Just open your browser and teach.</p>
     
-    <form class="email-form" id="waitlist-form" action="https://formsubmit.co/zyz9255@gmail.com" method="POST" target="_blank">
+    <form class="email-form" id="waitlist-form" action="https://formsubmit.co/ajax/zyz9255@gmail.com" method="POST">
         <input type="email" id="email" name="email" placeholder="Enter your email" required>
         <input type="hidden" name="source" value="hero">
         <button type="submit">Join the Waitlist</button>
@@ -365,7 +365,7 @@
 <section class="cta-section">
     <h2>Be the first to try CrystalClass</h2>
     <p>We're building this with teachers. Join the waitlist and help shape the tool you've been waiting for.</p>
-    <form class="email-form" id="waitlist-form-2" action="https://formsubmit.co/zyz9255@gmail.com" method="POST" target="_blank">
+    <form class="email-form" id="waitlist-form-2" action="https://formsubmit.co/ajax/zyz9255@gmail.com" method="POST">
         <input type="email" name="email" placeholder="Enter your email" required>
         <input type="hidden" name="source" value="bottom-cta">
         <button type="submit">Join the Waitlist</button>
@@ -519,9 +519,47 @@
     });
 })();
 
-// Waitlist form — 原生表单提交（直接 POST 到云服务器）
-// JS 无需干预，浏览器原生处理跨协议提交
-// 服务器返回后会在新标签页显示结果，关掉即可
+// Waitlist form — 用 AJAX 提交（不跳转页面）
+document.querySelectorAll('form[id^="waitlist-form"]').forEach(form => {
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = this.querySelector('button');
+        const origText = btn.textContent;
+        btn.textContent = 'Submitting...';
+        btn.disabled = true;
+
+        const data = new FormData(this);
+        data.append('_subject', 'New CrystalClass Waitlist Signup!');
+
+        try {
+            const resp = await fetch('https://formsubmit.co/ajax/zyz9255@gmail.com', {
+                method: 'POST',
+                body: data
+            });
+            const result = await resp.json();
+            if (result.success) {
+                this.style.display = 'none';
+                const msg = this.id === 'waitlist-form'
+                    ? document.getElementById('success-msg')
+                    : document.getElementById('success-msg-2');
+                msg.style.display = 'block';
+                if (this.id === 'waitlist-form') {
+                    document.querySelector('.form-note').style.display = 'none';
+                } else {
+                    this.nextElementSibling.style.display = 'none';
+                }
+            } else {
+                btn.textContent = origText;
+                btn.disabled = false;
+                alert('Something went wrong. Please try again.');
+            }
+        } catch(e) {
+            btn.textContent = origText;
+            btn.disabled = false;
+            alert('Network error. Please try again.');
+        }
+    });
+});
 </script>
 
 </body>
